@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lane County, OR — Employment Watch</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --color-primary: #2563EB;
+    --color-secondary: #0D9488;
+    --color-success: #16A34A;
+    --color-warning: #D97706;
+    --color-error: #DC2626;
+    --color-neutral: #6B7280;
+    --color-surface: #F9FAFB;
+    --color-surface-dark: #111827;
+    --color-text: #1F2937;
+    --color-text-muted: #9CA3AF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--color-text);
+    background: var(--color-surface);
+    line-height: 1.5;
+  }
+  header {
+    background: var(--color-surface-dark);
+    color: white;
+    padding: 32px 24px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 28px; }
+  header p { margin: 0; color: var(--color-text-muted); font-size: 14px; }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+  .notice {
+    background: #FEF3C7;
+    border-left: 4px solid var(--color-warning);
+    padding: 14px 16px;
+    margin: 0 0 24px;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+  .notice strong { color: var(--color-warning); }
+
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .kpi {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .kpi-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-neutral);
+    margin: 0 0 6px;
+  }
+  .kpi-value { font-size: 28px; font-weight: 700; margin: 0; }
+  .kpi-delta {
+    font-size: 13px;
+    margin-top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .kpi-delta.up { color: var(--color-error); }
+  .kpi-delta.down { color: var(--color-success); }
+  .kpi-delta.flat { color: var(--color-neutral); }
+
+  .panel {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .panel h2 { margin: 0 0 4px; font-size: 18px; }
+  .panel .subtitle { color: var(--color-neutral); font-size: 13px; margin: 0 0 16px; }
+  .chart-wrap { position: relative; height: 320px; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .occ-section h2 { margin-top: 8px; }
+  .occ-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .occ-card {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-left: 4px solid var(--color-error);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .occ-card.bright { border-left-color: var(--color-success); }
+  .occ-title {
+    font-weight: 600;
+    margin: 0 0 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .badge {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .badge.bright {
+    background: #DCFCE7;
+    color: var(--color-success);
+  }
+  .badge.pressured {
+    background: #FEE2E2;
+    color: var(--color-error);
+  }
+  .occ-code {
+    font-family: ui-monospace, monospace;
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin: 0 0 8px;
+  }
+  .occ-desc {
+    font-size: 13px;
+    color: var(--color-text);
+    margin: 0 0 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .skill-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #EFF6FF;
+    color: var(--color-primary);
+  }
+  .skill-tag.k { background: #F0FDFA; color: var(--color-secondary); }
+
+  footer {
+    border-top: 1px solid #E5E7EB;
+    padding: 20px 24px;
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--color-neutral);
+  }
+  footer code { background: #F3F4F6; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Lane County, OR — Employment Watch</h1>
+  <p>Demo application · data via <a href="https://olyport.com/" style="color:#93c5fd">olyport.com</a> · <span id="fetched-at"></span></p>
+</header>
+<main>
+
+<div class="notice" style="background:#EFF6FF; border-left-color: var(--color-primary);">
+  <strong style="color: var(--color-primary);">Demo notice.</strong> This is a demo application. Data is sourced via <a href="https://olyport.com/">olyport.com</a> (which surfaces BLS LAUS county/state labor data and O*NET occupational profiles through MCP servers). Not for production decision-making.
+</div>
+
+<div class="notice">
+  <strong>Method note.</strong> BLS does not publish unemployment rates broken out by profession at the county level. This dashboard combines what the BLS feed <em>can</em> measure (Lane County + Oregon overall labor stats) with O*NET occupation profiles to flag a watchlist of professions: those <em>tagged</em> Bright Outlook by O*NET (lower attrition risk) versus those not tagged (commonly pressured occupations — automation, e-commerce, industry decline). Treat this as directional, not as a county-level occupational unemployment ranking.
+</div>
+
+<section class="kpis" id="kpis"></section>
+
+<div class="panel">
+  <h2>Unemployment rate — Lane County vs. Oregon</h2>
+  <p class="subtitle">Monthly LAUS, Jan 2020 – Dec 2025 (Oct 2025 unavailable due to 2025 federal appropriations lapse)</p>
+  <div class="chart-wrap"><canvas id="rateChart"></canvas></div>
+</div>
+
+<div class="grid-2">
+  <div class="panel">
+    <h2>Lane County employment</h2>
+    <p class="subtitle">Persons employed (LAUS, monthly)</p>
+    <div class="chart-wrap"><canvas id="laneEmpChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <h2>Oregon — employed vs. unemployed</h2>
+    <p class="subtitle">Persons (LAUS, monthly stacked)</p>
+    <div class="chart-wrap"><canvas id="orStackChart"></canvas></div>
+  </div>
+</div>
+
+<section class="panel occ-section">
+  <h2>Occupation watchlist</h2>
+  <p class="subtitle">Profiles via O*NET MCP. Bright Outlook = projected high openings or rapid growth. Untagged here = no Bright Outlook signal — typically older or automation-pressured roles.</p>
+
+  <h3 style="margin: 16px 0 8px; color: var(--color-error);">Pressured / no Bright Outlook tag</h3>
+  <div class="occ-grid" id="occ-pressured"></div>
+
+  <h3 style="margin: 24px 0 8px; color: var(--color-success);">Bright Outlook (per O*NET)</h3>
+  <div class="occ-grid" id="occ-bright"></div>
+</section>
+
+</main>
+
+<footer>
+  <strong>Sources.</strong>
+  BLS LAUS series <code>LAUCN410390000000003/5/6</code> (Lane County, FIPS 41039) ·
+  <code>LAUST410000000000003/4/5/6</code> (Oregon).
+  O*NET-SOC occupation details and Bright Outlook flag via O*NET MCP server.
+  Some O*NET endpoints (career-outlook numerics, wages) returned errors at fetch time and are intentionally omitted rather than fabricated.
+  Data fetched at: <span id="fetched-at-2"></span>.
+</footer>
+
+<script>
+// ---- Live data captured from MCP at fetch time ----
+const FETCHED_AT = "2026-04-29";
+document.getElementById('fetched-at').textContent = "Fetched " + FETCHED_AT;
+document.getElementById('fetched-at-2').textContent = FETCHED_AT;
+
+// Lane County unemployment rate (LAUCN410390000000003)
+const laneRate = [
+  ["2020-01",4.1],["2020-02",3.9],["2020-03",4.8],["2020-04",14.1],["2020-05",12.1],["2020-06",10.4],
+  ["2020-07",10.1],["2020-08",8.0],["2020-09",7.7],["2020-10",6.2],["2020-11",5.8],["2020-12",6.3],
+  ["2021-01",7.2],["2021-02",6.8],["2021-03",6.7],["2021-04",6.0],["2021-05",5.4],["2021-06",5.8],
+  ["2021-07",5.6],["2021-08",5.2],["2021-09",4.5],["2021-10",3.9],["2021-11",3.8],["2021-12",3.8],
+  ["2022-01",4.7],["2022-02",4.3],["2022-03",4.2],["2022-04",3.8],["2022-05",3.5],["2022-06",4.2],
+  ["2022-07",4.6],["2022-08",4.7],["2022-09",4.2],["2022-10",4.3],["2022-11",4.3],["2022-12",4.1],
+  ["2023-01",4.6],["2023-02",4.3],["2023-03",3.9],["2023-04",3.2],["2023-05",3.4],["2023-06",3.8],
+  ["2023-07",4.1],["2023-08",4.1],["2023-09",3.8],["2023-10",3.8],["2023-11",3.7],["2023-12",4.1],
+  ["2024-01",4.8],["2024-02",4.6],["2024-03",4.4],["2024-04",3.7],["2024-05",3.7],["2024-06",4.1],
+  ["2024-07",4.6],["2024-08",4.5],["2024-09",4.1],["2024-10",4.0],["2024-11",4.0],["2024-12",4.3],
+  ["2025-01",5.2],["2025-02",5.1],["2025-03",5.0],["2025-04",3.9],["2025-05",4.5],["2025-06",5.1],
+  ["2025-07",5.3],["2025-08",5.5],["2025-09",5.3],["2025-10",null],["2025-11",4.8],["2025-12",5.0],
+];
+
+// Oregon unemployment rate (LAUST410000000000003)
+const orRate = [
+  ["2020-01",4.1],["2020-02",3.8],["2020-03",4.6],["2020-04",13.3],["2020-05",11.7],["2020-06",10.1],
+  ["2020-07",9.7],["2020-08",7.7],["2020-09",7.3],["2020-10",6.2],["2020-11",5.9],["2020-12",6.4],
+  ["2021-01",7.1],["2021-02",6.6],["2021-03",6.5],["2021-04",5.7],["2021-05",5.2],["2021-06",5.5],
+  ["2021-07",5.3],["2021-08",4.8],["2021-09",4.2],["2021-10",3.7],["2021-11",3.6],["2021-12",3.7],
+  ["2022-01",4.7],["2022-02",4.2],["2022-03",4.1],["2022-04",3.5],["2022-05",3.4],["2022-06",3.9],
+  ["2022-07",4.2],["2022-08",4.3],["2022-09",3.9],["2022-10",3.8],["2022-11",3.9],["2022-12",3.9],
+  ["2023-01",4.5],["2023-02",4.1],["2023-03",3.8],["2023-04",3.0],["2023-05",3.4],["2023-06",3.7],
+  ["2023-07",3.9],["2023-08",4.0],["2023-09",3.7],["2023-10",3.6],["2023-11",3.6],["2023-12",4.0],
+  ["2024-01",4.8],["2024-02",4.6],["2024-03",4.4],["2024-04",3.7],["2024-05",3.7],["2024-06",4.1],
+  ["2024-07",4.7],["2024-08",4.5],["2024-09",4.1],["2024-10",4.1],["2024-11",4.2],["2024-12",4.6],
+  ["2025-01",5.5],["2025-02",5.3],["2025-03",5.3],["2025-04",4.6],["2025-05",4.8],["2025-06",5.1],
+  ["2025-07",5.5],["2025-08",5.5],["2025-09",5.3],["2025-10",null],["2025-11",5.0],["2025-12",5.1],
+];
+
+// Lane County employment (persons)
+const laneEmp = [
+  ["2020-01",174657],["2020-02",176631],["2020-03",173629],["2020-04",152048],["2020-05",157873],["2020-06",161945],
+  ["2020-07",162227],["2020-08",166851],["2020-09",167564],["2020-10",173279],["2020-11",173286],["2020-12",172211],
+  ["2021-01",170133],["2021-02",171521],["2021-03",173300],["2021-04",175266],["2021-05",175295],["2021-06",175134],
+  ["2021-07",173827],["2021-08",174361],["2021-09",174820],["2021-10",178312],["2021-11",179490],["2021-12",178708],
+  ["2022-01",177637],["2022-02",179192],["2022-03",179620],["2022-04",179874],["2022-05",179837],["2022-06",178711],
+  ["2022-07",176372],["2022-08",176437],["2022-09",176765],["2022-10",177776],["2022-11",177064],["2022-12",177348],
+  ["2023-01",177928],["2023-02",178955],["2023-03",179376],["2023-04",179746],["2023-05",179967],["2023-06",181051],
+  ["2023-07",175926],["2023-08",177279],["2023-09",179160],["2023-10",180041],["2023-11",181301],["2023-12",179450],
+  ["2024-01",177899],["2024-02",180204],["2024-03",181216],["2024-04",182549],["2024-05",182280],["2024-06",181731],
+  ["2024-07",178365],["2024-08",178207],["2024-09",179429],["2024-10",181973],["2024-11",182102],["2024-12",181456],
+  ["2025-01",179342],["2025-02",180708],["2025-03",180642],["2025-04",181569],["2025-05",181497],["2025-06",181434],
+  ["2025-07",178464],["2025-08",178844],["2025-09",179542],["2025-10",null],["2025-11",182469],["2025-12",180876],
+];
+
+// Oregon employment & unemployment (persons)
+const orEmp = [
+  ["2020-01",1992418],["2020-02",2008777],["2020-03",1981810],["2020-04",1757818],["2020-05",1834934],["2020-06",1897546],["2020-07",1918677],["2020-08",1973054],["2020-09",1975321],["2020-10",2012537],["2020-11",2005224],["2020-12",1992755],
+  ["2021-01",1962758],["2021-02",1980848],["2021-03",2007205],["2021-04",2021740],["2021-05",2022198],["2021-06",2027872],["2021-07",2044683],["2021-08",2045028],["2021-09",2045984],["2021-10",2062171],["2021-11",2069886],["2021-12",2061180],
+  ["2022-01",2047671],["2022-02",2071204],["2022-03",2079660],["2022-04",2079123],["2022-05",2077752],["2022-06",2072601],["2022-07",2092666],["2022-08",2092306],["2022-09",2083974],["2022-10",2075763],["2022-11",2059030],["2022-12",2052445],
+  ["2023-01",2056156],["2023-02",2071034],["2023-03",2079417],["2023-04",2082422],["2023-05",2083126],["2023-06",2096396],["2023-07",2095826],["2023-08",2100121],["2023-09",2102754],["2023-10",2098382],["2023-11",2105615],["2023-12",2080159],
+  ["2024-01",2056149],["2024-02",2078432],["2024-03",2092198],["2024-04",2104197],["2024-05",2100358],["2024-06",2107119],["2024-07",2106653],["2024-08",2110717],["2024-09",2116968],["2024-10",2114837],["2024-11",2099116],["2024-12",2091704],
+  ["2025-01",2081430],["2025-02",2083219],["2025-03",2088723],["2025-04",2102931],["2025-05",2100820],["2025-06",2109348],["2025-07",2110395],["2025-08",2110746],["2025-09",2110506],["2025-10",null],["2025-11",2110205],["2025-12",2092799],
+];
+const orUnemp = [
+  ["2020-01",84163],["2020-02",79476],["2020-03",96294],["2020-04",270616],["2020-05",242800],["2020-06",214095],["2020-07",206003],["2020-08",165711],["2020-09",155687],["2020-10",132752],["2020-11",126738],["2020-12",136189],
+  ["2021-01",149295],["2021-02",140684],["2021-03",139907],["2021-04",122956],["2021-05",111780],["2021-06",118375],["2021-07",113796],["2021-08",103862],["2021-09",89722],["2021-10",79367],["2021-11",76404],["2021-12",79889],
+  ["2022-01",100697],["2022-02",90214],["2022-03",88447],["2022-04",75116],["2022-05",72356],["2022-06",83961],["2022-07",91102],["2022-08",93739],["2022-09",84103],["2022-10",82868],["2022-11",82672],["2022-12",84225],
+  ["2023-01",97617],["2023-02",89532],["2023-03",82110],["2023-04",64694],["2023-05",73261],["2023-06",80902],["2023-07",86068],["2023-08",87351],["2023-09",80560],["2023-10",78280],["2023-11",78290],["2023-12",87508],
+  ["2024-01",104193],["2024-02",100948],["2024-03",97005],["2024-04",80258],["2024-05",81731],["2024-06",90930],["2024-07",102880],["2024-08",99346],["2024-09",90857],["2024-10",90290],["2024-11",93121],["2024-12",100304],
+  ["2025-01",120155],["2025-02",117024],["2025-03",116510],["2025-04",100576],["2025-05",106166],["2025-06",114513],["2025-07",123442],["2025-08",122862],["2025-09",117300],["2025-10",null],["2025-11",110592],["2025-12",111721],
+];
+
+const occupations = [
+  // Pressured / no Bright Outlook
+  { code:"45-4022.00", title:"Logging Equipment Operators", bright:false,
+    desc:"Drive logging tractors or wheeled vehicles equipped with bulldozer blades, frontal shears, grapples, logging arches, cable winches, or crane booms — to fell trees and skid, load, unload, or stack logs.",
+    skills:["Operation and Control","Operations Monitoring","Equipment Maintenance"],
+    knowledge:["Mechanical","Public Safety and Security","Production and Processing"] },
+  { code:"51-7041.00", title:"Sawing Machine Operators, Wood", bright:false,
+    desc:"Set up, operate, or tend wood sawing machines. May operate computer numerically controlled (CNC) equipment.",
+    skills:["Operation and Control","Operations Monitoring","Quality Control Analysis"],
+    knowledge:["Production and Processing","Mechanical"] },
+  { code:"51-5112.00", title:"Printing Press Operators", bright:false,
+    desc:"Set up and operate digital, letterpress, lithographic, flexographic, gravure, or other printing machines, including short-run offset presses.",
+    skills:["Quality Control Analysis","Operations Monitoring","Operation and Control"],
+    knowledge:["Mechanical","Production and Processing"] },
+  { code:"43-3071.00", title:"Tellers", bright:false,
+    desc:"Receive and pay out money. Keep records of money and negotiable instruments involved in a financial institution's various transactions.",
+    skills:["Active Listening","Speaking","Critical Thinking"],
+    knowledge:["Customer and Personal Service","Mathematics","Economics and Accounting"] },
+  { code:"43-9022.00", title:"Word Processors & Typists", bright:false,
+    desc:"Use word processor, computer, or typewriter to type letters, reports, forms, or other material from rough draft, corrected copy, or voice recording.",
+    skills:["Reading Comprehension","Active Listening","Writing"],
+    knowledge:["Administrative","English Language","Computers and Electronics"] },
+  { code:"41-3041.00", title:"Travel Agents", bright:false,
+    desc:"Plan and sell transportation and accommodations for customers. Determine destination, modes of transportation, dates, costs, and accommodations.",
+    skills:["Active Listening","Service Orientation","Speaking"],
+    knowledge:["Customer and Personal Service","Sales and Marketing","Geography"] },
+  { code:"43-5052.00", title:"Postal Service Mail Carriers", bright:false,
+    desc:"Sort and deliver mail for the United States Postal Service (USPS). Deliver mail on established route by vehicle or on foot.",
+    skills:["Active Listening","Critical Thinking","Social Perceptiveness"],
+    knowledge:["Customer and Personal Service","Public Safety and Security"] },
+
+  // Bright Outlook
+  { code:"41-2011.00", title:"Cashiers", bright:true,
+    desc:"Receive and disburse money in establishments other than financial institutions. May use electronic scanners, cash registers, or related equipment.",
+    skills:["Service Orientation","Active Listening","Social Perceptiveness"],
+    knowledge:["Customer and Personal Service","Sales and Marketing"] },
+  { code:"29-1141.00", title:"Registered Nurses", bright:true,
+    desc:"Assess patient health problems and needs, develop and implement nursing care plans, and maintain medical records. Administer nursing care to ill, injured, or disabled patients.",
+    skills:["Social Perceptiveness","Active Listening","Critical Thinking"],
+    knowledge:["Medicine and Dentistry","Psychology","Customer and Personal Service"] },
+  { code:"15-1252.00", title:"Software Developers", bright:true,
+    desc:"Research, design, and develop computer and network software or specialized utility programs. Analyze user needs and apply principles of computer science, engineering, and mathematical analysis.",
+    skills:["Programming","Critical Thinking","Active Learning"],
+    knowledge:["Computers and Electronics","Mathematics","English Language"] },
+  { code:"31-1121.00", title:"Home Health Aides", bright:true,
+    desc:"Monitor health status of individuals with disabilities or illness; address needs such as changing bandages, administering medication, and assisting with daily living.",
+    skills:["Active Listening","Service Orientation","Social Perceptiveness"],
+    knowledge:["Customer and Personal Service","English Language"] },
+  { code:"43-4051.00", title:"Customer Service Representatives", bright:true,
+    desc:"Interact with customers to provide information in response to inquiries about products and services. Handle and resolve general complaints.",
+    skills:["Active Listening","Service Orientation","Speaking"],
+    knowledge:["Customer and Personal Service","Sales and Marketing"] },
+];
+
+// ---- Render ----
+const monthLabels = laneRate.map(d => d[0]);
+
+function renderKPIs() {
+  const lastIdx = laneRate.length - 1; // Dec 2025
+  const yearAgo = lastIdx - 12;
+  const lastRate = laneRate[lastIdx][1];
+  const yagoRate = laneRate[yearAgo][1];
+  const delta = (lastRate - yagoRate).toFixed(1);
+  const dir = delta > 0 ? "up" : delta < 0 ? "down" : "flat";
+  const arrow = delta > 0 ? "▲" : delta < 0 ? "▼" : "—";
+
+  const lastEmp = laneEmp[lastIdx][1];
+  const yagoEmp = laneEmp[yearAgo][1];
+  const empDelta = lastEmp - yagoEmp;
+  const empDir = empDelta > 0 ? "down" : empDelta < 0 ? "up" : "flat"; // employed up = good (down arrow on bad scale)
+  const empArrow = empDelta > 0 ? "▲" : empDelta < 0 ? "▼" : "—";
+
+  const orLastRate = orRate[lastIdx][1];
+
+  const k = document.getElementById('kpis');
+  k.innerHTML = `
+    <div class="kpi">
+      <p class="kpi-label">Lane County unemployment</p>
+      <p class="kpi-value">${lastRate.toFixed(1)}%</p>
+      <span class="kpi-delta ${dir}">${arrow} ${Math.abs(delta)}pp YoY</span>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Oregon unemployment</p>
+      <p class="kpi-value">${orLastRate.toFixed(1)}%</p>
+      <span class="kpi-delta ${orLastRate > lastRate ? 'up' : 'down'}">${orLastRate > lastRate ? '▲' : '▼'} vs Lane Co.</span>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Lane County employed</p>
+      <p class="kpi-value">${lastEmp.toLocaleString()}</p>
+      <span class="kpi-delta ${empDir === 'up' ? 'up' : 'down'}">${empArrow} ${Math.abs(empDelta).toLocaleString()} YoY</span>
+    </div>
+    <div class="kpi">
+      <p class="kpi-label">Oregon unemployed (count)</p>
+      <p class="kpi-value">${orUnemp[lastIdx][1].toLocaleString()}</p>
+      <span class="kpi-delta flat">Dec 2025</span>
+    </div>
+  `;
+}
+
+function lineChart(canvasId, datasets) {
+  return new Chart(document.getElementById(canvasId), {
+    type: 'line',
+    data: { labels: monthLabels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 12 } } },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y == null ? 'n/a' : c.parsed.y}` } },
+      },
+      scales: {
+        x: { ticks: { maxTicksLimit: 12, autoSkip: true } },
+        y: { beginAtZero: false, grid: { color: '#F3F4F6' } },
+      },
+      elements: { point: { radius: 0, hoverRadius: 4 }, line: { borderWidth: 2, tension: 0.2 } },
+    }
+  });
+}
+
+function renderRateChart() {
+  lineChart('rateChart', [
+    { label: 'Lane County', data: laneRate.map(d => d[1]), borderColor: '#2563EB', backgroundColor: 'rgba(37,99,235,0.08)', spanGaps: true },
+    { label: 'Oregon',      data: orRate.map(d => d[1]),  borderColor: '#0D9488', backgroundColor: 'rgba(13,148,136,0.08)', spanGaps: true, borderDash: [4,3] },
+  ]);
+}
+
+function renderLaneEmpChart() {
+  lineChart('laneEmpChart', [
+    { label: 'Lane County employed', data: laneEmp.map(d => d[1]), borderColor: '#0D9488', backgroundColor: 'rgba(13,148,136,0.15)', fill: true, spanGaps: true },
+  ]);
+}
+
+function renderOrStackChart() {
+  new Chart(document.getElementById('orStackChart'), {
+    type: 'line',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Employed', data: orEmp.map(d => d[1]), borderColor: '#16A34A', backgroundColor: 'rgba(22,163,74,0.5)', fill: true, spanGaps: true },
+        { label: 'Unemployed', data: orUnemp.map(d => d[1]), borderColor: '#DC2626', backgroundColor: 'rgba(220,38,38,0.7)', fill: true, spanGaps: true },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
+      scales: {
+        x: { ticks: { maxTicksLimit: 12, autoSkip: true }, stacked: true },
+        y: { stacked: true, ticks: { callback: v => (v/1000).toFixed(0) + 'k' } },
+      },
+      elements: { point: { radius: 0, hoverRadius: 4 }, line: { borderWidth: 1.5, tension: 0.2 } },
+    }
+  });
+}
+
+function renderOccupations() {
+  const cardHTML = (o) => `
+    <div class="occ-card${o.bright ? ' bright' : ''}">
+      <p class="occ-title">
+        <span>${o.title}</span>
+        <span class="badge ${o.bright ? 'bright' : 'pressured'}">${o.bright ? 'Bright' : 'Watch'}</span>
+      </p>
+      <p class="occ-code">SOC ${o.code}</p>
+      <p class="occ-desc">${o.desc}</p>
+      <div class="skill-list">
+        ${o.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+        ${o.knowledge.slice(0,2).map(s => `<span class="skill-tag k">${s}</span>`).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('occ-pressured').innerHTML = occupations.filter(o => !o.bright).map(cardHTML).join('');
+  document.getElementById('occ-bright').innerHTML    = occupations.filter(o =>  o.bright).map(cardHTML).join('');
+}
+
+renderKPIs();
+renderRateChart();
+renderLaneEmpChart();
+renderOrStackChart();
+renderOccupations();
+</script>
+</body>
+</html>
