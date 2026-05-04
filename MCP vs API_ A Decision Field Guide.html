@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)file:///Users/brandondorman/Downloads/mcp-vs-api.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>MCP vs API: A Decision Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./MCP vs API_ A Decision Field Guide_files/css2" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --paper:#f4ede0;
+    --rule:#1a1a1a;
+    --accent:#c8412c;
+    --accent2:#2d5a3d;
+    --mute:#6b6356;
+    --grid:#d9cfb8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--paper);color:var(--ink);font-family:'Fraunces',serif}
+  body{
+    padding:48px 32px;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(26,26,26,0.06) 1px, transparent 0);
+    background-size:24px 24px;
+  }
+  .sheet{
+    max-width:1180px;margin:0 auto;
+    background:var(--paper);
+    border:2px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+    position:relative;
+    overflow:hidden;
+  }
+  .stamp{
+    position:absolute;top:24px;right:24px;
+    border:2px solid var(--accent);color:var(--accent);
+    padding:6px 14px;font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.2em;transform:rotate(4deg);
+    text-transform:uppercase;font-weight:700;
+  }
+
+  /* HEADER */
+  header{padding:48px 56px 32px;border-bottom:2px solid var(--ink);position:relative}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.3em;
+    text-transform:uppercase;color:var(--mute);margin-bottom:18px;
+    display:flex;gap:16px;align-items:center;
+  }
+  .eyebrow::after{content:"";flex:1;height:1px;background:var(--ink);opacity:.3}
+  h1{
+    font-family:'Fraunces',serif;font-weight:900;
+    font-size:clamp(48px,7vw,96px);line-height:.92;letter-spacing:-.03em;
+    font-variation-settings:"opsz" 144;
+  }
+  h1 .vs{
+    font-style:italic;font-weight:400;color:var(--accent);
+    font-variation-settings:"opsz" 144;
+  }
+  h1 .api{text-decoration:underline;text-decoration-thickness:6px;text-underline-offset:8px}
+  .subhead{
+    margin-top:24px;font-size:18px;line-height:1.5;max-width:720px;
+    color:var(--ink);font-weight:400;
+  }
+  .subhead em{color:var(--accent);font-style:italic}
+
+  /* CORE DEFINITIONS */
+  .defs{
+    display:grid;grid-template-columns:1fr 80px 1fr;
+    border-bottom:2px solid var(--ink);
+  }
+  .def{padding:36px 40px;position:relative}
+  .def.api{background:var(--paper)}
+  .def.mcp{background:#ebe1cd}
+  .def-label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.25em;text-transform:uppercase;color:var(--mute);
+    margin-bottom:8px;
+  }
+  .def h2{
+    font-family:'Fraunces',serif;font-weight:900;font-size:32px;
+    letter-spacing:-.02em;margin-bottom:12px;
+  }
+  .def h2 .num{
+    font-family:'JetBrains Mono',monospace;font-weight:400;
+    font-size:14px;color:var(--mute);vertical-align:top;margin-right:8px;
+  }
+  .def p{font-size:15px;line-height:1.55;color:#3a3a3a}
+  .def code{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    background:var(--ink);color:var(--paper);padding:2px 8px;
+  }
+  .vs-divider{
+    display:flex;align-items:center;justify-content:center;
+    border-left:2px solid var(--ink);border-right:2px solid var(--ink);
+    background:var(--ink);color:var(--paper);
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    font-size:42px;
+  }
+
+  /* DECISION FLOW */
+  .flow-section{padding:56px 56px 48px;border-bottom:2px solid var(--ink)}
+  .section-title{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.3em;text-transform:uppercase;color:var(--mute);
+    margin-bottom:8px;
+  }
+  .section-h{
+    font-family:'Fraunces',serif;font-weight:900;font-size:36px;
+    letter-spacing:-.02em;margin-bottom:32px;line-height:1;
+  }
+  .section-h em{font-style:italic;color:var(--accent);font-weight:400}
+
+  .questions{
+    display:grid;gap:20px;
+  }
+  .q{
+    display:grid;grid-template-columns:60px 1fr 280px;gap:24px;
+    padding:24px 28px;border:1.5px solid var(--ink);
+    background:var(--paper);position:relative;
+    transition:transform .2s;
+  }
+  .q-num{
+    font-family:'Fraunces',serif;font-weight:900;font-style:italic;
+    font-size:48px;line-height:1;color:var(--accent);
+    font-variation-settings:"opsz" 144;
+  }
+  .q-body h3{
+    font-family:'Fraunces',serif;font-weight:600;font-size:22px;
+    line-height:1.25;letter-spacing:-.01em;margin-bottom:8px;
+  }
+  .q-body p{font-size:14px;line-height:1.55;color:#3a3a3a}
+  .verdict{
+    display:flex;flex-direction:column;justify-content:center;
+    align-items:flex-start;gap:6px;
+    border-left:1.5px dashed var(--ink);padding-left:24px;
+  }
+  .verdict-label{
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--mute);
+  }
+  .verdict-answer{
+    font-family:'Fraunces',serif;font-weight:900;font-size:20px;
+    line-height:1.1;
+  }
+  .verdict-answer.mcp{color:var(--accent)}
+  .verdict-answer.api{color:var(--accent2)}
+  .verdict-answer.either{color:var(--mute);font-style:italic;font-weight:400}
+  .verdict small{
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    color:var(--mute);line-height:1.4;
+  }
+
+  /* SCORECARD */
+  .score{
+    padding:56px;border-bottom:2px solid var(--ink);
+    background:#ebe1cd;
+  }
+  .score-grid{
+    display:grid;grid-template-columns:2fr 1fr 1fr;
+    border:2px solid var(--ink);background:var(--paper);
+  }
+  .score-grid > div{
+    padding:18px 24px;border-bottom:1px solid var(--ink);
+    border-right:1px solid var(--ink);
+    font-size:15px;
+  }
+  .score-grid > div:nth-child(3n){border-right:none}
+  .score-grid .head{
+    background:var(--ink);color:var(--paper);
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.25em;text-transform:uppercase;font-weight:700;
+  }
+  .score-grid .head:first-child{font-size:13px;letter-spacing:.15em}
+  .score-grid .factor{font-weight:600;font-family:'Fraunces',serif;font-size:16px}
+  .score-grid .pick{
+    font-family:'JetBrains Mono',monospace;font-size:13px;
+    text-transform:uppercase;letter-spacing:.1em;font-weight:500;
+  }
+  .pick.win{color:var(--accent);font-weight:700}
+  .pick.win::before{content:"▲ ";font-size:10px}
+  .pick.lose{color:var(--mute)}
+  .pick.tie{color:var(--accent2);font-style:italic}
+  .score-grid > div:last-child,
+  .score-grid > div:nth-last-child(2),
+  .score-grid > div:nth-last-child(3){border-bottom:none}
+
+  /* RULE OF THUMB */
+  .rule{
+    padding:56px;display:grid;grid-template-columns:1fr 1fr;gap:48px;
+    border-bottom:2px solid var(--ink);
+  }
+  .rule-card{
+    padding:32px;border:2px solid var(--ink);
+    position:relative;
+  }
+  .rule-card.choose-mcp{background:var(--paper)}
+  .rule-card.choose-api{background:#1a1a1a;color:var(--paper)}
+  .rule-card .tag{
+    position:absolute;top:-14px;left:24px;
+    background:var(--accent);color:var(--paper);
+    font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.2em;text-transform:uppercase;font-weight:700;
+    padding:4px 14px;
+  }
+  .rule-card.choose-api .tag{background:var(--paper);color:var(--ink)}
+  .rule-card h3{
+    font-family:'Fraunces',serif;font-weight:900;font-size:28px;
+    letter-spacing:-.01em;margin-bottom:16px;line-height:1.1;
+  }
+  .rule-card h3 em{font-style:italic;color:var(--accent);font-weight:400}
+  .rule-card.choose-api h3 em{color:#e8a48f}
+  .rule-card ul{list-style:none}
+  .rule-card li{
+    padding:10px 0;border-bottom:1px dashed currentColor;
+    font-size:14px;line-height:1.5;
+    display:flex;gap:12px;align-items:flex-start;
+  }
+  .rule-card li:last-child{border-bottom:none}
+  .rule-card li::before{
+    content:"→";font-family:'JetBrains Mono',monospace;
+    font-weight:700;flex-shrink:0;
+  }
+  .rule-card.choose-mcp li::before{color:var(--accent)}
+
+  /* BOTTOM */
+  footer{
+    padding:32px 56px;display:flex;justify-content:space-between;
+    align-items:flex-end;font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--mute);
+  }
+  footer .axiom{
+    font-family:'Fraunces',serif;font-style:italic;font-weight:400;
+    font-size:18px;letter-spacing:0;text-transform:none;color:var(--ink);
+    max-width:520px;line-height:1.4;
+  }
+  footer .axiom strong{
+    font-style:normal;font-weight:900;color:var(--accent);
+    border-bottom:2px solid var(--accent);
+  }
+
+  /* responsive */
+  @media (max-width:880px){
+    body{padding:16px 8px}
+    header{padding:32px 24px 24px}
+    .defs{grid-template-columns:1fr}
+    .vs-divider{padding:16px;border-left:none;border-right:none;
+      border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+    .flow-section,.score,.rule{padding:32px 24px}
+    .q{grid-template-columns:48px 1fr;gap:12px}
+    .verdict{grid-column:1 / -1;border-left:none;border-top:1.5px dashed var(--ink);
+      padding-left:0;padding-top:16px}
+    .rule{grid-template-columns:1fr}
+    .score-grid{font-size:13px}
+    .score-grid > div{padding:12px 14px}
+    footer{flex-direction:column;gap:16px;align-items:flex-start;padding:24px}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="stamp">Field Guide № 01</div>
+
+  <header>
+    <div class="eyebrow"><span>A Decision Field Guide</span><span>Rev. 2026.05</span></div>
+    <h1>When to ship an<br><span class="vs">MCP server</span> instead of<br>a plain <span class="api">API</span>.</h1>
+    <p class="subhead">Both expose capability. Only one is built so an <em>LLM agent</em> can discover it, reason about it, and chain it. Use this guide to decide which fits the job — or whether you need both.</p>
+  </header>
+
+  <section class="defs">
+    <div class="def api">
+      <div class="def-label">Option A</div>
+      <h2><span class="num">01</span>REST / GraphQL API</h2>
+      <p>A contract for <strong>known callers</strong>. Documented endpoints, auth scheme, and schemas that a developer reads, integrates against once, and ships. Optimized for predictable, high-volume, programmatic access. <code>curl</code>, SDKs, and dashboards live here.</p>
+    </div>
+    <div class="vs-divider">vs.</div>
+    <div class="def mcp">
+      <div class="def-label">Option B</div>
+      <h2><span class="num">02</span>MCP Server</h2>
+      <p>A contract for <strong>language models</strong>. Tools, resources, and prompts described in a way an agent can introspect at runtime, with structured inputs/outputs the model can plan against. Often a thin layer <em>over</em> existing APIs — not a replacement.</p>
+    </div>
+  </section>
+
+  <section class="flow-section">
+    <div class="section-title">Section I — Diagnostic Questions</div>
+    <h2 class="section-h">Five questions, in order. <em>Stop at the first decisive answer.</em></h2>
+
+    <div class="questions">
+
+      <div class="q">
+        <div class="q-num">1</div>
+        <div class="q-body">
+          <h3>Is the primary caller a human-written program, or an LLM agent?</h3>
+          <p>If a developer is integrating once, against a known set of endpoints, into deterministic code — they want a stable API contract, not tool descriptions and capability discovery. Agents need the opposite: runtime introspection.</p>
+        </div>
+        <div class="verdict">
+          <span class="verdict-label">If LLM-driven →</span>
+          <span class="verdict-answer mcp">MCP</span>
+          <small>If deterministic code → API</small>
+        </div>
+      </div>
+
+      <div class="q">
+        <div class="q-num">2</div>
+        <div class="q-body">
+          <h3>Will callers need to discover capabilities at runtime?</h3>
+          <p>APIs assume the caller read the docs. MCP assumes the caller is figuring out, mid-task, which of N tools to invoke. If your tool surface changes, expands, or varies per user/tenant, MCP's discovery protocol earns its keep.</p>
+        </div>
+        <div class="verdict">
+          <span class="verdict-label">Dynamic discovery →</span>
+          <span class="verdict-answer mcp">MCP</span>
+          <small>Static contract → API</small>
+        </div>
+      </div>
+
+      <div class="q">
+        <div class="q-num">3</div>
+        <div class="q-body">
+          <h3>Do operations need to be composed across multiple systems in one reasoning step?</h3>
+          <p>Pulling a roster from one system, mapping it to a competency framework in another, then writing back enrichment? An agent over a single MCP server (that wraps several backends) will plan that. Stitching three separate APIs together usually means writing the orchestrator yourself.</p>
+        </div>
+        <div class="verdict">
+          <span class="verdict-label">Cross-system reasoning →</span>
+          <span class="verdict-answer mcp">MCP</span>
+          <small>Single-system CRUD → API</small>
+        </div>
+      </div>
+
+      <div class="q">
+        <div class="q-num">4</div>
+        <div class="q-body">
+          <h3>Is throughput, latency, or cost-per-call the dominant constraint?</h3>
+          <p>High-frequency machine-to-machine traffic — billing, telemetry, search indexing — wants the thinnest path possible. MCP adds a model-in-the-loop and tool-description overhead. Don't put your hot path behind it.</p>
+        </div>
+        <div class="verdict">
+          <span class="verdict-label">Hot path →</span>
+          <span class="verdict-answer api">API</span>
+          <small>Exploratory / agentic → MCP</small>
+        </div>
+      </div>
+
+      <div class="q">
+        <div class="q-num">5</div>
+        <div class="q-body">
+          <h3>Who controls the client?</h3>
+          <p>If you ship the client (mobile app, internal service, partner SDK), an API gives you tight control over auth, retries, and behavior. If clients are Claude Desktop, ChatGPT, Cursor, or whatever shows up next month — you can't ship into all of them. MCP is the portable surface.</p>
+        </div>
+        <div class="verdict">
+          <span class="verdict-label">You ship the client →</span>
+          <span class="verdict-answer api">API</span>
+          <small>Third-party agents → MCP</small>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="score">
+    <div class="section-title">Section II — Scorecard</div>
+    <h2 class="section-h">By dimension, who wins?</h2>
+    <div class="score-grid">
+      <div class="head">Dimension</div>
+      <div class="head">REST/GraphQL API</div>
+      <div class="head">MCP Server</div>
+
+      <div class="factor">Discoverability at runtime</div>
+      <div class="pick lose">Out-of-band docs</div>
+      <div class="pick win">Built-in protocol</div>
+
+      <div class="factor">Throughput / latency</div>
+      <div class="pick win">Direct, minimal overhead</div>
+      <div class="pick lose">Adds tool-call layer</div>
+
+      <div class="factor">Cross-system orchestration</div>
+      <div class="pick lose">Caller stitches manually</div>
+      <div class="pick win">Single agent, many tools</div>
+
+      <div class="factor">Deterministic integrations</div>
+      <div class="pick win">Stable, versioned contract</div>
+      <div class="pick lose">Tool surface can drift</div>
+
+      <div class="factor">Auth, rate limits, audit</div>
+      <div class="pick win">Mature, battle-tested</div>
+      <div class="pick lose">Newer, evolving patterns</div>
+
+      <div class="factor">Reach across LLM clients</div>
+      <div class="pick lose">Each client needs custom code</div>
+      <div class="pick win">Portable across hosts</div>
+
+      <div class="factor">Domain reasoning over data</div>
+      <div class="pick lose">Caller brings the brain</div>
+      <div class="pick win">Model uses tool descriptions to plan</div>
+
+      <div class="factor">Cost per operation</div>
+      <div class="pick win">Predictable, low</div>
+      <div class="pick lose">Token cost on every turn</div>
+    </div>
+  </section>
+
+  <section class="rule">
+    <div class="rule-card choose-mcp">
+      <span class="tag">Choose MCP when</span>
+      <h3>The work is <em>exploratory, compositional, or agent-shaped.</em></h3>
+      <ul>
+        <li>An LLM needs to plan across heterogeneous systems (e.g. wrap CASE Network, EdFi, INFUSE behind one semantic surface).</li>
+        <li>Tool surface is large, varies per user, or grows over time.</li>
+        <li>You want third-party agents (Claude, ChatGPT, IDE assistants) to use your platform without you writing a client for each.</li>
+        <li>The value is in <em>reasoning over</em> the data, not just moving it.</li>
+        <li>You're prototyping: MCP lets a model try things you haven't pre-coded.</li>
+      </ul>
+    </div>
+    <div class="rule-card choose-api">
+      <span class="tag">Choose API when</span>
+      <h3>The work is <em>predictable, high-volume, or human-built.</em></h3>
+      <ul>
+        <li>Known clients, known calls, deterministic flows.</li>
+        <li>Latency and per-call cost matter more than flexibility.</li>
+        <li>You need rock-solid auth, RBAC, audit, SLAs, versioning.</li>
+        <li>The integration is written once and runs forever.</li>
+        <li>Your callers don't need a model in the loop to figure out what to do.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <div class="axiom">
+      The honest answer for most platforms: <strong>build the API first, then expose an MCP server on top.</strong> One serves your engineers; the other serves their agents.
+    </div>
+    <div>End of guide · Print at A3</div>
+  </footer>
+</div>
+
+
+</body></html>
